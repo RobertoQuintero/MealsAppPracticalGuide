@@ -1,43 +1,25 @@
 import React from "react";
-import { StyleSheet, Text, View, Button, FlatList } from "react-native";
-import { CATEGORIES, MEALS } from "../data/dummy-data";
-import MealItem from "../components/MealItem";
-const CategoryMealsScreen = (props) => {
-  const renderMealItem = (itemData) => {
-    return (
-      <MealItem
-        title={itemData.item.title}
-        duration={itemData.item.duration}
-        complexity={itemData.item.complexity}
-        affordability={itemData.item.affordability}
-        image={itemData.item.imageUrl}
-        onSelectMeal={() => {
-          props.navigation.navigate({
-            routeName: "MealDetail",
-            params: {
-              mealId: itemData.item.id,
-            },
-          });
-        }}
-      />
-    );
-  };
-  const catId = props.navigation.getParam("categoryId");
-  const selectedCategory = CATEGORIES.find((cat) => cat.id === catId);
+import { CATEGORIES } from "../data/dummy-data";
+import MealList from "../components/MealList";
+import { useSelector } from "react-redux";
+import { View, StyleSheet } from "react-native";
+import DefaultText from "../components/DefaultText";
 
-  const displayMeals = MEALS.filter(
+const CategoryMealsScreen = (props) => {
+  const catId = props.navigation.getParam("categoryId");
+
+  const availableMeals = useSelector((state) => state.meals.filteredMeals);
+  const displayMeals = availableMeals.filter(
     (meal) => meal.categoryIds.indexOf(catId) >= 0
   );
-  return (
-    <View style={styles.screen}>
-      <FlatList
-        data={displayMeals}
-        keyExtractor={(item) => item.id}
-        renderItem={renderMealItem}
-        style={{ width: "100%" }}
-      />
-    </View>
-  );
+  if (displayMeals.length === 0) {
+    return (
+      <View style={styles.content}>
+        <DefaultText>No meals found, maybe check your filters?</DefaultText>
+      </View>
+    );
+  }
+  return <MealList listData={displayMeals} navigation={props.navigation} />;
 };
 CategoryMealsScreen.navigationOptions = (navigationData) => {
   const catId = navigationData.navigation.getParam("categoryId");
@@ -51,10 +33,9 @@ CategoryMealsScreen.navigationOptions = (navigationData) => {
 export default CategoryMealsScreen;
 
 const styles = StyleSheet.create({
-  screen: {
+  content: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 10,
   },
 });

@@ -5,8 +5,15 @@ import { AppLoading } from "expo";
 import { useScreens, enableScreens } from "react-native-screens";
 import MealsNavigation from "./navigation/MealsNavigation";
 
+import { createStore, combineReducers } from "redux";
+import mealsReducer from "./store/reducers/meals";
+import { Provider } from "react-redux";
+
 // useScreens();
 enableScreens();
+const rootReducer = combineReducers({ meals: mealsReducer });
+const store = createStore(rootReducer);
+
 const fetchFonts = () => {
   return Font.loadAsync({
     "open-sans": {
@@ -28,5 +35,9 @@ export default function App() {
       <AppLoading startAsync={fetchFonts} onFinish={setFontLoaded(true)} />
     );
   }
-  return <MealsNavigation />;
+  return (
+    <Provider store={store}>
+      <MealsNavigation />
+    </Provider>
+  );
 }
